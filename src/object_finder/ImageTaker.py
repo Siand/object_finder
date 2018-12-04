@@ -3,7 +3,7 @@ import cv2
 
 class ImageTaker(object):
     def __init__(self):
-        self.cap = cv2.VideoCapture(0) 
+        self.cap = cv2.VideoCapture(1) 
     def __enter__(self):
         return self
 
