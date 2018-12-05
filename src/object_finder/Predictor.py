@@ -78,6 +78,7 @@ class Predictor(object):
         else:
             for i in range(0,sample_num):
                 img_array.append(self.image_taker.capture())
+                cv2.imshow("frame", img_array[i])
                 cv2.imwrite("asd{0}.jpg".format(i),img_array[i])
                 time.sleep(sample_delay/1000)   
         for img in img_array:

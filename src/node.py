@@ -21,12 +21,14 @@ class OFClassifier(object):
 
     def image_callback(self, status):
         if not self.locked:
+            #print self.timeout
             if( (status.status_list and status.status_list[0].status == 3) or self.timeout == 0):
                 self.timeout = 10
                 self.locked = True
                 (b_pred, b_pos) = self.ball_predictor.predict()   
                 hp = 0
-                #print 'Image taken: ' + str(b_pred) + ', ' + str(b_pos)
+                print str(self.prints) + 'Image taken: ' + str(b_pred) + ', ' + str(b_pos)
+                self.prints+=1
                 if  b_pred != 1:
                     print str(self.prints) + ' ' + str(self.pos_estimator.place(0, b_pos))
                     self.prints += 1

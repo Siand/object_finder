@@ -1,6 +1,6 @@
 import math
 import rospy
-from geometry_msgs.msg import PoseWithCovarianceStamped
+from geometry_msgs.msg import Pose, PoseArray, PoseWithCovarianceStamped
 from tf.transformations import euler_from_quaternion
 
 # TODO Map
@@ -14,21 +14,21 @@ class PositionEstimator(object):
     distList = [1,2,4,7]
 
     # items is like {'hat': 0, 'ball': 2}
-    def __init__(self, items, mapName='', verbose=False):
+    def __init__(self, items, topicName='/found_ball', verbose=False):
         self.verbose = verbose
         
         # set up list of items to find
         self.target_items = items
         self.found_items = {'hat': 0, 'ball': 0}
-        self.found_positions = []
+        self.found_positions = PoseArray()
 
         # set up subscriber for /amcl_pose to update robot position & heading
         self.robot_position = [0,0]
         self.robot_heading = 0.0
         self.sub = rospy.Subscriber('/amcl_pose', PoseWithCovarianceStamped, self.robot_moved_callback)
         
-        # set up empty map using mapName parameter
-
+        # set up publisher to rviz 
+        self.treasure_pub = rospy.Publisher(topicName, PoseArray, queue_size=1)
 
         # if requested, give feedback
         if verbose:
@@ -58,8 +58,14 @@ class PositionEstimator(object):
         x = self.robot_position[0] + math.cos(angle) * dist
         y = self.robot_position[1] + math.sin(angle) * dist
         
-        # add to internal map
-        x, y
+        # publish for rviz to find
+        pose = Pose()
+        pose.position.x = x
+        pose.position.y = y
+        angle = quaternion_from_euler(0.0, 0.0, angle)
+        pose.orientation = Quaternion(*angle)
+        self.found_positions.poses.append(pose)
+        self.treasure_pub.publish(self.found_positions)
         
         # update list of items to find
         self.found_items[itemType] = self.found_items[itemType] + 1
