@@ -49,9 +49,9 @@ class PositionEstimator(object):
         h = pos // 4
         w = pos % 4
         angle = -22.5 + (w * 15)
-        dist = self.distList[h]
+        dist = self.distList[int(h)]
         if self.verbose:
-            print('pos:',pos,', h:',h,', w:',w,', angle:',angle,', dist:', dist)
+            print('pos:' + str(pos) + ', h:'+str(h)+', w:'+str(w)+', angle:'+str(angle)+', dist:'+str(dist))
 
         # find absolute position based on robotPose
         angle = math.radians(angle) + self.robot_heading
@@ -78,8 +78,8 @@ class PositionEstimator(object):
         self.robot_position = [p.x, p.y]
         (discard1, discard2, self.robot_heading) = euler_from_quaternion([o.x, o.y, o.z, o.w])
         if self.verbose:
-            print('New location: (', p.x, ',', p.y,')')
-            print('New heading: ', self.robot_heading)
+            print('New location: ('+ str(p.x) + ', ' + str(p.y) + ')')
+            print('New heading: ' + str(self.robot_heading))
 
     # after program execution, save map with positions of found items
     def save_map(self, filename='treasure_map'):
