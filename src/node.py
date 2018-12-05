@@ -1,8 +1,26 @@
 #!/usr/bin/python
 
 import object_finder.Predictor as pred
+import object_finder.PositionEstimator as posest
+import rospy
+from actionlib_msgs.msg import GoalStatusArray
 
 if __name__ == '__main__':
-    predictor = pred.Predictor()
-    print(predictor.predict())
+    ball_predictor = pred.Predictor("ir_cnn_balls_2.hdf5",0 )
+    print(ball_predictor.predict())
 
+class OFClassifier(object):
+    def __init__(self):
+        items = {'ball':0 ,'hat': 1}
+        self.ball_predictor = pred.Predictor("ir_cnn_balls_2.hdf5",0)
+        self.pos_estimator = posest.PositionEstimator(items)
+        self.command_taker = rospy.Subscriber("/move_base/status", GoalStatusArray, self.image_callback, queue_size=1)
+
+    def image_callback(self, status):
+        if(status.status_list[0].status == 3):
+            ball_predictions = self.ball_predictor.predict()    
+            (b_pred, b_pos) = ball_predictions
+            hp = 0
+            if  b_pred != 1:
+                self.pos_estimator.place(0, b_pos)
+        
