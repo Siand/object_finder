@@ -81,9 +81,8 @@ class Predictor(object):
             for i in range(0,sample_num):
                 img_array.append(self.image_taker.capture())
                 #cv2.imshow("frame", img_array[i])
-                cv2.imwrite("asd{0}.jpg".format(self.counter),img_array[i])
+                cv2.imwrite("empty/newEmpty{0}.jpg".format(self.counter),img_array[i])
                 self.counter +=1
-                self.counter = self.counter % 8
                 #cv2.waitKey(30)
                 time.sleep(sample_delay/1000)   
         for img in img_array:

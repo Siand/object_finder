@@ -1,6 +1,6 @@
 import math
 import rospy
-from geometry_msgs.msg import Pose, PoseArray, PoseWithCovarianceStamped
+from geometry_msgs.msg import Pose, PoseArray, PoseWithCovarianceStamped, Quaternion
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 # TODO Map
