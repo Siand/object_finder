@@ -82,20 +82,14 @@ class Predictor(object):
         else:
             for i in range(0,sample_num):
                 img_array.append(self.image_taker.capture())
-                #cv2.imshow("frame", img_array[i])
-                cv2.imwrite("empty/newEmpty{0}.jpg".format(self.counter),img_array[i])
-                self.counter +=1
-                #cv2.waitKey(30)
-                time.sleep(sample_delay/1000)   
+                cv2.imwrite("new_ball/newBall{0}.jpg".format(self.counter),img_array[i])
+                self.counter +=1  
         for img in img_array:
-            rimg = img.copy()
-            cv2im = rimg
+            cv2im = img.copy()
             cv2im = cv2.cvtColor(cv2im, cv2.COLOR_BGR2RGB)
             pil_im = Image.fromarray(cv2im)
-            #pil_im.show()
             pil_im = pil_im.resize((150,150))
-            pil_im.show()
-            rimg = np.array(pil_im) 
+            rimg = np.array(pil_im)
             x = rimg.reshape((1,) + rimg.shape) 
             cl = self.model.predict_classes(x)
             if(cl[0][0] == self.obj_num):

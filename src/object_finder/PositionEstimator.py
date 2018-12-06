@@ -1,6 +1,7 @@
 import math
 import rospy
 from geometry_msgs.msg import Pose, PoseArray, PoseWithCovarianceStamped, Quaternion
+from visualization_msgs.msg import MarkerArray, Marker
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 # TODO Map
@@ -16,11 +17,11 @@ class PositionEstimator(object):
     # items is like {'hat': 0, 'ball': 2}
     def __init__(self, items, topicName='/found_ball', verbose=False):
         self.verbose = verbose
-        
+        self.markerid=0
         # set up list of items to find
         self.target_items = items
         self.found_items = {'hat': 0, 'ball': 0}
-        self.found_positions = PoseArray()
+        self.found_positions = MarkerArray()
 
         # set up subscriber for /amcl_pose to update robot position & heading
         self.robot_position = [0,0]
@@ -28,7 +29,7 @@ class PositionEstimator(object):
         self.sub = rospy.Subscriber('/amcl_pose', PoseWithCovarianceStamped, self.robot_moved_callback)
         
         # set up publisher to rviz 
-        self.treasure_pub = rospy.Publisher(topicName, PoseArray, queue_size=1)
+        self.treasure_pub = rospy.Publisher(topicName, MarkerArray, queue_size=1)
 
         # if requested, give feedback
         if verbose:
@@ -64,12 +65,26 @@ class PositionEstimator(object):
         pose.position.y = y
         angle = quaternion_from_euler(0.0, 0.0, angle)
         pose.orientation = Quaternion(*angle)
-        self.found_positions.poses.append(pose)
+        marker = Marker()
+        marker.pose = pose
+        marker.type = marker.SPHERE
+        marker.action = marker.ADD
+        marker.scale.x = 0.2
+        marker.scale.y = 0.2
+        marker.scale.z = 0.2
+        marker.color.a = 1.0
+        marker.color.r = 1.0
+        marker.color.g = 1.0
+        marker.color.b = 0.0
+        marker.id=self.markerid
+        marker.header.frame_id = "map"
+        self.markerid+=1
+        self.found_positions.markers.append(marker)
+        
         self.treasure_pub.publish(self.found_positions)
         
         # update list of items to find
         self.found_items[itemType] = self.found_items[itemType] + 1
-        self.found_positions.append([itemType, (x, y)])
         return itemType, (x, y)
 
     def get_positions(self):
