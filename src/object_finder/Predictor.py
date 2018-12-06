@@ -2,9 +2,11 @@ from keras.models import Sequential, load_model
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
 import ImageTaker
+from PIL import Image
 import numpy as np
 import time
 import cv2
+import random
 class Predictor(object):
     def __init__(self, model_name, object_num):
         self.image_taker = ImageTaker.ImageTaker()
@@ -75,7 +77,7 @@ class Predictor(object):
         tile = 16
         if use_file:
             img = load_img("./balls/ball101.jpg")
-            img = img[...,::-1].astype(np.float32)
+            img = img[...,::-1].astype(np.float32)#/255.0
             img_array.append(img)
         else:
             for i in range(0,sample_num):
@@ -87,9 +89,14 @@ class Predictor(object):
                 time.sleep(sample_delay/1000)   
         for img in img_array:
             rimg = img.copy()
-            rimg.resize((150,150,3))
-            rimg = img_to_array(rimg)
-            x = rimg.reshape((1,) + rimg.shape)        
+            cv2im = rimg
+            cv2im = cv2.cvtColor(cv2im, cv2.COLOR_BGR2RGB)
+            pil_im = Image.fromarray(cv2im)
+            #pil_im.show()
+            pil_im = pil_im.resize((150,150))
+            pil_im.show()
+            rimg = np.array(pil_im) 
+            x = rimg.reshape((1,) + rimg.shape) 
             cl = self.model.predict_classes(x)
             if(cl[0][0] == self.obj_num):
                 tile_array.append(self.locate_ball(img))
@@ -98,6 +105,7 @@ class Predictor(object):
             return (1-self.obj_num,None)
         item_pos = self.choose_tile(tile_array)
         m = max(return_array)
-        best_pred = [i for i, j in enumerate(return_array) if j == m] 
+        best_pred = [i for i, j in enumerate(return_array) if j == m]
+        random.shuffle(best_pred)
         return (best_pred[0],item_pos)
 
